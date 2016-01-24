@@ -1,0 +1,198 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>signle_margin_trade_ratio</title><meta name="generator" content="MATLAB 8.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2015-12-10"><meta name="DC.source" content="signle_margin_trade_ratio.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="comment">%generate the ratio between margin buy,margin repay and total trading amount of  every</span>
+<span class="comment">%single stock,</span>
+
+<span class="comment">%</span>
+db_conn=database(<span class="string">'jrgc'</span>,<span class="string">'wind'</span>,<span class="string">'wind'</span>,<span class="string">'oracle.jdbc.driver.OracleDriver'</span>,<span class="string">'jdbc:oracle:thin:@192.168.120.8:1521:'</span>);
+select = <span class="string">'SELECT M.s_info_windcode,M.trade_dt,M.s_Margin_purchwithborrowmoney,nvl(M.s_margin_repaymenttobroker,0), P.s_dq_amount'</span>;
+from = <span class="string">' FROM AshareMarginTrade M, AshareEODPrices P'</span>;
+where = <span class="string">' WHERE M.s_info_windcode=P.s_info_windcode AND M.trade_dt=P.trade_dt AND P.s_dq_amount&lt;&gt;0'</span>;
+order = <span class="string">' ORDER BY M.trade_dt'</span>;
+sqlquery = strcat(select, from, where,order);
+curs = exec(db_conn,sqlquery);
+curs = fetch(curs);
+margin_data = curs.Data;
+margin_trading = cell2mat(curs.Data(:,3:4));
+
+<span class="comment">%note that the unit of margin buying is 1, the unit of trading amount is</span>
+<span class="comment">%10000, remember to multiply 10000 to the latter.</span>
+total_amount = cell2mat(curs.Data(:,5))*10000;
+[a,b] = size(margin_data);
+fprintf(<span class="string">'Total rows are: %d\n'</span>,a);
+close(curs)
+
+<span class="comment">%stock_code, tradt_dt, ratio.</span>
+data_to_insert = cell(a,4);
+table_name = <span class="string">'FEDATA.AShare_MarginTrading_Pct'</span>;
+col_names = {<span class="string">'s_info_windcode'</span>,<span class="string">'trade_dt'</span>,<span class="string">'margin_buy_Pct'</span>,<span class="string">'margin_repay_pct'</span>};
+row_count = 0;
+margin_buy_daily = 0;
+margin_repay_daily = 0;
+normal_amount_daily = 0;
+td = <span class="string">''</span>;
+overall_data_to_insert = {};
+<span class="keyword">for</span> i=1:a
+    <span class="keyword">if</span> strcmp(td,margin_data{i,2}) ~= 1
+        <span class="keyword">if</span> i ~= 1
+            overall_data_to_insert = [overall_data_to_insert; [<span class="string">'000000.X'</span>,td,num2cell([round(margin_buy_daily/normal_amount_daily*100,2),round(margin_repay_daily/normal_amount_daily*100,2)])]];
+        <span class="keyword">end</span>
+        td = margin_data{i,2};
+        margin_buy_daily = 0;
+        margin_repay_daily = 0;
+        normal_amount_daily = 0;
+    <span class="keyword">end</span>
+    data_to_insert(i,:) = [margin_data(i,1),margin_data(i,2),num2cell(round(margin_trading(i,:)/total_amount(i)*100,2))];
+    row_count = row_count + 1;
+    margin_buy_daily = margin_buy_daily + margin_trading(i,1);
+    margin_repay_daily = margin_repay_daily + margin_trading(i,2);
+    normal_amount_daily = normal_amount_daily + total_amount(i);
+    <span class="keyword">if</span> mod(row_count,100000)==0
+        fprintf(<span class="string">'This many one hundred thousands lines prepared: %d.\n'</span>,row_count/100000);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+datainsert(db_conn,table_name,col_names,data_to_insert);
+overall_data_to_insert = [overall_data_to_insert; [<span class="string">'000000.X'</span>,td,num2cell([round(margin_buy_daily/normal_amount_daily*100,2),round(margin_repay_daily/normal_amount_daily*100,2)])]];
+datainsert(db_conn,table_name,col_names,overalldata_to_insert);
+commit(db_conn)
+close(db_conn)
+fprintf(<span class="string">'All done, byebye.\n'</span>)
+</pre><pre class="codeoutput">Total rows are: 589059
+This many one hundred thousands lines prepared: 1.
+This many one hundred thousands lines prepared: 2.
+This many one hundred thousands lines prepared: 3.
+This many one hundred thousands lines prepared: 4.
+This many one hundred thousands lines prepared: 5.
+</pre><pre class="codeoutput error">&#38169;&#35823;&#20351;&#29992; database/datainsert (line 320)
+Unable to complete insert operation. ORA-01438: &#20540;&#22823;&#20110;&#20026;&#27492;&#21015;&#25351;&#23450;&#30340;&#20801;&#35768;&#31934;&#24230;
+
+
+&#20986;&#38169; signle_margin_trade_ratio (line 52)
+datainsert(db_conn,table_name,col_names,data_to_insert);
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2015b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%generate the ratio between margin buy,margin repay and total trading amount of  every
+%single stock,
+
+%
+db_conn=database('jrgc','wind','wind','oracle.jdbc.driver.OracleDriver','jdbc:oracle:thin:@192.168.120.8:1521:');
+select = 'SELECT M.s_info_windcode,M.trade_dt,M.s_Margin_purchwithborrowmoney,nvl(M.s_margin_repaymenttobroker,0), P.s_dq_amount';
+from = ' FROM AshareMarginTrade M, AshareEODPrices P';
+where = ' WHERE M.s_info_windcode=P.s_info_windcode AND M.trade_dt=P.trade_dt AND P.s_dq_amount<>0';
+order = ' ORDER BY M.trade_dt';
+sqlquery = strcat(select, from, where,order);
+curs = exec(db_conn,sqlquery);
+curs = fetch(curs);
+margin_data = curs.Data;
+margin_trading = cell2mat(curs.Data(:,3:4));
+
+%note that the unit of margin buying is 1, the unit of trading amount is
+%10000, remember to multiply 10000 to the latter.
+total_amount = cell2mat(curs.Data(:,5))*10000;
+[a,b] = size(margin_data);
+fprintf('Total rows are: %d\n',a);
+close(curs)
+
+%stock_code, tradt_dt, ratio.
+data_to_insert = cell(a,4);
+table_name = 'FEDATA.AShare_MarginTrading_Pct';
+col_names = {'s_info_windcode','trade_dt','margin_buy_Pct','margin_repay_pct'};
+row_count = 0;
+margin_buy_daily = 0;
+margin_repay_daily = 0;
+normal_amount_daily = 0;
+td = '';
+overall_data_to_insert = {};
+for i=1:a
+    if strcmp(td,margin_data{i,2}) ~= 1
+        if i ~= 1
+            overall_data_to_insert = [overall_data_to_insert; ['000000.X',td,num2cell([round(margin_buy_daily/normal_amount_daily*100,2),round(margin_repay_daily/normal_amount_daily*100,2)])]];
+        end
+        td = margin_data{i,2};
+        margin_buy_daily = 0;
+        margin_repay_daily = 0;
+        normal_amount_daily = 0;
+    end
+    data_to_insert(i,:) = [margin_data(i,1),margin_data(i,2),num2cell(round(margin_trading(i,:)/total_amount(i)*100,2))];
+    row_count = row_count + 1; 
+    margin_buy_daily = margin_buy_daily + margin_trading(i,1);
+    margin_repay_daily = margin_repay_daily + margin_trading(i,2);
+    normal_amount_daily = normal_amount_daily + total_amount(i);
+    if mod(row_count,100000)==0
+        fprintf('This many one hundred thousands lines prepared: %d.\n',row_count/100000);
+    end
+end
+datainsert(db_conn,table_name,col_names,data_to_insert);
+overall_data_to_insert = [overall_data_to_insert; ['000000.X',td,num2cell([round(margin_buy_daily/normal_amount_daily*100,2),round(margin_repay_daily/normal_amount_daily*100,2)])]];
+datainsert(db_conn,table_name,col_names,overalldata_to_insert);
+commit(db_conn)
+close(db_conn)
+fprintf('All done, byebye.\n')
+##### SOURCE END #####
+--></body></html>
