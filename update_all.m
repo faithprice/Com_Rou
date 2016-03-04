@@ -1,4 +1,0 @@
-update_AshareEMAs
-update_index_EMA_Percents
-update_Asharelimitmove
-update_Ashare_Margintrading_pct
