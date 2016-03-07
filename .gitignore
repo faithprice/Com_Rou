@@ -3,3 +3,7 @@
 *.xls
 *.xlsx
 *.csv
+
+#PyCharm
+*.xml
+*.iml

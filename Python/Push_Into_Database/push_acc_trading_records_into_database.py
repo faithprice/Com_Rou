@@ -2,9 +2,15 @@
 import os
 import cx_Oracle
 import pandas as pd
+
 os.environ["NLS_LANG"] = ".AL32UTF8"
+
 os.putenv('ORACLE_HOME', '/usr/local/lib/share/oracle')
 os.putenv('LD_LIBRARY_PATH', '/usr/local/lib/share/oracle')
+os.environ['ORACLE_HOME'] = '/usr/local/lib/share/oracle'
+os.environ['LD_LIBRARY_PATH'] =  '/usr/local/lib/share/oracle'
+
+
 
 trading_record = '融金添利交易20150301-20151031.xls'
 df = pd.read_excel(trading_record, skiprows=1, skip_footer=1)
